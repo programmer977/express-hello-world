@@ -15,8 +15,8 @@ let carros = [
 // --- Página inicial ---
 app.get("/", (req, res) => {
   res.type("html").send(`
-    <h1>Verily, bem-vindo à Alvecar JP</h1>
-    <p>Oficina de motores e histórias.</p>
+    <h1>Bem-vindo à Alvecar JP</h1>
+    <p>Oficina de carros e motores.</p>
   `);
 });
 
