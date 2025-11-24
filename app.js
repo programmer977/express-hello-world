@@ -2,14 +2,75 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.get("/", (req, res) => res.type('html').send(html));
-app.get("/list/:id", (req, response) => {
-  response.json({hello: "world"})
-});
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.use(express.json());
 
-server.keepAliveTimeout = 120 * 1000;
-server.headersTimeout = 120 * 1000;
+// --- “Registro dos Carros de Alvecar JP” ---
+// Como no Livro Vermelho dos Artesões, guardaremos tudo na memória,
+// frágil como folhas secas ao vento.
+let carros = [
+  { id: 1, modelo: "Gol 1.6", dono: "Rafael", servico: "Troca de óleo" },
+  { id: 2, modelo: "Corsa Sedan", dono: "Marta", servico: "Revisão geral" }
+];
+
+// --- Página inicial ---
+app.get("/", (req, res) => {
+  res.type("html").send(`
+    <h1>Verily, bem-vindo à Alvecar JP</h1>
+    <p>Oficina de motores e histórias.</p>
+  `);
+});
+
+// --- Listar todos os carros (READ) ---
+app.get("/carros", (req, res) => {
+  res.json(carros);
+});
+
+// --- Adicionar um novo carro (CREATE) ---
+app.post("/carros", (req, res) => {
+  const novo = {
+    id: carros.length + 1,
+    modelo: req.body.modelo,
+    dono: req.body.dono,
+    servico: req.body.servico
+  };
+
+  carros.push(novo);
+  res.json({ mensagem: "Hath sido adicionado com honra.", carro: novo });
+});
+
+// --- Atualizar um carro existente (UPDATE) ---
+app.put("/carros/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const carro = carros.find(c => c.id === id);
+
+  if (!carro) {
+    return res.status(404).json({ erro: "Tal carro não foi encontrado entre os registros." });
+  }
+
+  carro.modelo = req.body.modelo ?? carro.modelo;
+  carro.dono = req.body.dono ?? carro.dono;
+  carro.servico = req.body.servico ?? carro.servico;
+
+  res.json({ mensagem: "A runa foi reescrita.", carro });
+});
+
+// --- Remover um carro (DELETE) ---
+app.delete("/carros/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const indice = carros.findIndex(c => c.id === id);
+
+  if (indice === -1) {
+    return res.status(404).json({ erro: "Nenhum carro com tal número repousa aqui." });
+  }
+
+  const removido = carros.splice(indice, 1);
+  res.json({ mensagem: "O registro foi levado pelo vento.", removido });
+});
+
+// --- Servidor ---
+app.listen(port, () =>
+  console.log(`Alvecar JP ouvindo na porta ${port}, como um ferreiro atento!`)
+);
 
 const html = `
 <!DOCTYPE html>
